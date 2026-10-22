@@ -1,8 +1,18 @@
 pipeline {
-    agent any
-
-    environment {
-        PATH = "/var/jenkins_home/bin:${env.PATH}"
+    agent {
+        kubernetes {
+            yaml '''
+apiVersion: v1
+kind: Pod
+spec:
+  serviceAccountName: jenkins-deployer
+  containers:
+    - name: kubectl
+      image: alpine/k8s:1.33.13
+      command: ["sleep"]
+      args: ["99d"]
+'''
+        }
     }
 
     stages {
@@ -10,15 +20,25 @@ pipeline {
             steps { checkout scm }
         }
         stage('Validate') {
-            steps { sh 'kubectl apply --dry-run=server -f deployment.yaml' }
+            steps {
+                container('kubectl') {
+                    sh 'kubectl apply --dry-run=server -f deployment.yaml'
+                }
+            }
         }
         stage('Deploy') {
-            steps { sh 'kubectl apply -f deployment.yaml' }
+            steps {
+                container('kubectl') {
+                    sh 'kubectl apply -f deployment.yaml'
+                }
+            }
         }
         stage('Verify') {
             steps {
-                sh 'kubectl rollout status deployment/nginx --timeout=120s'
-                sh 'kubectl get pods -l app=nginx -o wide'
+                container('kubectl') {
+                    sh 'kubectl rollout status deployment/nginx --timeout=120s'
+                    sh 'kubectl get pods -l app=nginx -o wide'
+                }
             }
         }
     }
