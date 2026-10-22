@@ -22,22 +22,22 @@ spec:
         stage('Validate') {
             steps {
                 container('kubectl') {
-                    sh 'kubectl apply --dry-run=server -f deployment.yaml'
+                    sh 'kubectl -n default apply --dry-run=server -f deployment.yaml'
                 }
             }
         }
         stage('Deploy') {
             steps {
                 container('kubectl') {
-                    sh 'kubectl apply -f deployment.yaml'
+                    sh 'kubectl -n default apply -f deployment.yaml'
                 }
             }
         }
         stage('Verify') {
             steps {
                 container('kubectl') {
-                    sh 'kubectl rollout status deployment/nginx --timeout=120s'
-                    sh 'kubectl get pods -l app=nginx -o wide'
+                    sh 'kubectl -n default rollout status deployment/nginx --timeout=120s'
+                    sh 'kubectl -n default get pods -l app=nginx -o wide'
                 }
             }
         }
