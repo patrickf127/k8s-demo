@@ -8,7 +8,7 @@ spec:
   serviceAccountName: jenkins-deployer
   containers:
     - name: kubectl
-      image: alpine/k8s:1.33.13
+      image: alpine/kubectl:1.33.4
       command: ["sleep"]
       args: ["99d"]
 '''
